@@ -1,0 +1,12 @@
+---
+description: 
+globs: 
+alwaysApply: true
+---
+
+# Use these tools
+
+- Python backend (Flask)
+- Next.js front end
+- MySQL database
+- Write tests in Python

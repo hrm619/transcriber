@@ -15,7 +15,7 @@ source .venv/bin/activate  # On Unix/macOS
 
 2. Install dependencies:
 ```bash
-pip3 install crewai pytube openai langchain langchain-openai python-dotenv whisper pydub ffmpeg-python
+pip install -r requirements.txt
 ```
 
 3. Create a `.env` file with your configuration:
@@ -28,4 +28,25 @@ LOG_LEVEL=INFO
 ## Requirements
 - Python 3.x
 - FFmpeg
-- OpenAI API key 
+- OpenAI API key
+
+## Usage
+
+Run the transcriber with a YouTube URL and a prompt for summarization:
+
+```bash
+python transcribe.py https://www.youtube.com/watch?v=dQw4w9WgXcQ "Summarize the key points of this video"
+```
+
+You can also use the mock mode for testing:
+
+```bash
+python transcribe.py https://www.youtube.com/watch?v=dQw4w9WgXcQ "Summarize the key points" --mock
+```
+
+## Implementation
+
+This application uses LangGraph to create a workflow with three main nodes:
+1. YouTube Downloader - Downloads the video as audio
+2. Audio Transcriber - Transcribes the audio to text
+3. Content Summarizer - Summarizes the text based on the prompt 

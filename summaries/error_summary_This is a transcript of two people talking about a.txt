@@ -1,0 +1,9 @@
+This is a mock summary for testing purposes.
+
+Based on the prompt: "This is a transcript of two people talking about an NFL draft prospect. Please summarize the transcript, including: 1. Player Info (Name, Position, College Team, etc) 2. Strengths (traits vs production, anything elite?) 3. Weaknesses (any major red flags?) 4. College team context 5. Player comparisons (good & bad) 6. Draft round projection"
+
+For the YouTube video with ID: unknown
+
+In a real scenario, this would contain an actual AI-generated summary of the content.
+Since we're using mock data, this placeholder is provided to demonstrate the complete pipeline workflow.
+The summary would typically address the specific points requested in the prompt instruction.

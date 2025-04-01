@@ -2,10 +2,13 @@ import os
 import logging
 import argparse
 from dotenv import load_dotenv
-from crewai import Crew
+from crewai import Crew, Process
 
-from agents import create_downloader_agent, create_transcription_agent, create_summarization_agent
-from tasks import create_download_task, create_transcription_task, create_summarization_task
+from app.agents import create_agents
+from app.tasks import create_tasks, configure_download_task, configure_transcription_task, configure_summarization_task
+from utils.youtube_downloader import download_youtube_audio
+from utils.transcriber import transcribe_audio
+from utils.summarizer import summarize_text
 
 # Load environment variables
 load_dotenv()
@@ -17,65 +20,49 @@ logging.basicConfig(
 )
 logger = logging.getLogger(__name__)
 
-def process_youtube_video(youtube_url, prompt_instruction):
-    """
-    Process a YouTube video by downloading it, transcribing it, and summarizing it.
+def run_youtube_processing(youtube_url, prompt_instruction):
+    """Run the YouTube processing pipeline."""
+    # Create agents
+    agents_dict = create_agents()
     
-    Args:
-        youtube_url (str): URL of the YouTube video
-        prompt_instruction (str): Prompt for summarization
+    # Create task dictionary
+    tasks_dict = create_tasks(agents_dict)
     
-    Returns:
-        str: The summary of the video
-    """
-    try:
-        logger.info(f"Starting to process YouTube video: {youtube_url}")
-        logger.info(f"Using summarization prompt: {prompt_instruction}")
-        
-        # Create agents
-        downloader_agent = create_downloader_agent()
-        transcription_agent = create_transcription_agent()
-        summarization_agent = create_summarization_agent()
-        
-        # Create download task
-        download_task = create_download_task(downloader_agent, youtube_url)
-        
-        # Create the crew with just the download task initially
-        crew = Crew(
-            agents=[downloader_agent, transcription_agent, summarization_agent],
-            tasks=[download_task],
-            verbose=2
-        )
-        
-        # Execute the download task
-        result = crew.kickoff()
-        audio_file_path = result
-        
-        logger.info(f"Downloaded audio file: {audio_file_path}")
-        
-        # Create and execute transcription task
-        transcription_task = create_transcription_task(transcription_agent, audio_file_path)
-        crew.tasks = [transcription_task]
-        transcript_file, transcript_text = crew.kickoff()
-        
-        logger.info(f"Transcribed to: {transcript_file}")
-        
-        # Create and execute summarization task
-        summarization_task = create_summarization_task(
-            summarization_agent, 
-            transcript_text, 
-            prompt_instruction
-        )
-        crew.tasks = [summarization_task]
-        summary_file, summary = crew.kickoff()
-        
-        logger.info(f"Generated summary: {summary_file}")
-        
-        return summary
-        
-    except Exception as e:
-        logger.error(f"Error processing YouTube video: {str(e)}")
-        raise
+    # Configure the first task - downloading
+    configure_download_task(
+        tasks_dict, 
+        agents_dict['youtube_downloader'], 
+        youtube_url
+    )
+    
+    # Execute download task
+    download_result = tasks_dict['download_task'].execute()
+    audio_file_path = download_result
+    
+    # Configure the second task - transcription
+    configure_transcription_task(
+        tasks_dict,
+        agents_dict['audio_transcriber'],
+        audio_file_path
+    )
+    
+    # Execute transcription task
+    transcription_result = tasks_dict['transcription_task'].execute()
+    transcript_file, transcript_text = transcription_result
+    
+    # Configure the third task - summarization
+    configure_summarization_task(
+        tasks_dict,
+        agents_dict['content_summarizer'],
+        transcript_text,
+        prompt_instruction
+    )
+    
+    # Execute summarization task
+    summarization_result = tasks_dict['summarization_task'].execute()
+    summary_file, summary_text = summarization_result
+    
+    return summary_text
 
 def main():
     # Parse command line arguments
@@ -86,13 +73,13 @@ def main():
     args = parser.parse_args()
     
     # Process the YouTube video
-    summary = process_youtube_video(args.youtube_url, args.prompt)
+    result = run_youtube_processing(args.youtube_url, args.prompt)
     
     # Print the summary
     print("\n" + "="*50)
     print("SUMMARY")
     print("="*50)
-    print(summary)
+    print(result)
     print("="*50)
 
 if __name__ == "__main__":

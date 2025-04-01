@@ -1,0 +1,23 @@
+download_task:
+  description: "Download the YouTube video at {youtube_url} as an MP3 file."
+  expected_output: "Path to the downloaded MP3 file."
+  agent: youtube_downloader
+  async_execution: false
+  context:
+    - youtube_url
+
+transcription_task:
+  description: "Transcribe the audio file at {audio_file_path} to text."
+  expected_output: "The transcription of the audio file and path to the transcript file."
+  agent: audio_transcriber
+  async_execution: false
+  context:
+    - audio_file_path
+
+summarization_task:
+  description: "Summarize the transcript based on the following prompt: {prompt_instruction}"
+  expected_output: "A summary of the transcript that focuses on the aspects mentioned in the prompt."
+  agent: content_summarizer
+  async_execution: false
+  context:
+    - prompt_instruction 

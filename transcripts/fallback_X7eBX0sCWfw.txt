@@ -1,0 +1,5 @@
+This is a mock transcript for testing purposes.
+The original video ID was: X7eBX0sCWfw
+In a real scenario, this would contain the actual transcription of the YouTube video.
+Since we couldn't download or process the actual video, this placeholder is used instead.
+This enables testing of the full pipeline even when YouTube downloads fail.
