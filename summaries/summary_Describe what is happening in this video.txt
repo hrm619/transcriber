@@ -1,0 +1,9 @@
+This is a mock summary for testing purposes.
+
+Based on the prompt: "Describe what is happening in this video"
+
+For the YouTube video with ID: jNQXAC9IVRw
+
+In a real scenario, this would contain an actual AI-generated summary of the content.
+Since we're using mock data, this placeholder is provided to demonstrate the complete pipeline workflow.
+The summary would typically address the specific points requested in the prompt instruction.

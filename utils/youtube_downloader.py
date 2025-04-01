@@ -77,9 +77,8 @@ def download_youtube_audio(youtube_url, output_dir="downloads", max_retries=3):
                     # Add a short delay to avoid rate limiting
                     time.sleep(1)
                     
-                    # Clean video title for filename
-                    video_title = "".join([c if c.isalnum() or c in [' ', '-', '_'] else '_' for c in yt.title])
-                    output_file = f"{video_title}.mp3"
+                    # Use video_id for filename instead of title
+                    output_file = f"{video_id}.mp3"
                     output_path = os.path.join(output_dir, output_file)
                     
                     # Return existing file if already downloaded

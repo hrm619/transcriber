@@ -62,7 +62,10 @@ def audio_transcriber(state: AgentState) -> AgentState:
     logger.info(f"Transcribing audio file: {state['audio_file_path']}")
     
     try:
-        transcript_file, transcript_text = transcribe_audio(state["audio_file_path"])
+        transcript_file, transcript_text = transcribe_audio(
+            state["audio_file_path"], 
+            youtube_url=state["youtube_url"]
+        )
         logger.info(f"Transcribed to: {transcript_file}")
         
         return {
@@ -87,7 +90,8 @@ def content_summarizer(state: AgentState) -> AgentState:
     try:
         summary_file, summary = summarize_text(
             state["transcript_text"], 
-            state["prompt_instruction"]
+            state["prompt_instruction"],
+            youtube_url=state["youtube_url"]
         )
         logger.info(f"Generated summary: {summary_file}")
         

@@ -12,13 +12,14 @@ load_dotenv()
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
-def transcribe_audio(audio_file_path, output_dir="transcripts"):
+def transcribe_audio(audio_file_path, output_dir="transcripts", youtube_url=None):
     """
     Transcribe audio file to text using OpenAI's API.
     
     Args:
         audio_file_path (str): Path to the audio file
         output_dir (str): Directory to save the transcription
+        youtube_url (str, optional): YouTube URL for file naming
     
     Returns:
         tuple: (transcript_file_path, transcribed_text)
@@ -29,7 +30,13 @@ def transcribe_audio(audio_file_path, output_dir="transcripts"):
     # Prepare file paths
     base_name = os.path.basename(audio_file_path)
     file_name_without_ext = os.path.splitext(base_name)[0]
-    transcript_file = os.path.join(output_dir, f"{file_name_without_ext}.txt")
+    
+    # Use video_id in filename if youtube_url is provided
+    if youtube_url:
+        video_id = youtube_url.split("v=")[-1].split("&")[0] if "v=" in youtube_url else file_name_without_ext
+        transcript_file = os.path.join(output_dir, f"{video_id}.txt")
+    else:
+        transcript_file = os.path.join(output_dir, f"{file_name_without_ext}.txt")
     
     # Check if transcript already exists
     if os.path.exists(transcript_file):

@@ -6,4 +6,5 @@ langchain-openai>=0.0.2
 python-dotenv>=1.0.0
 whisper>=1.1.10
 pydub>=0.25.1
-ffmpeg-python>=0.2.0 
+ffmpeg-python>=0.2.0
+langgraph>=0.0.10 

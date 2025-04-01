@@ -1,0 +1,7 @@
+Note: Transcription failed with error: Error code: 429 - {'error': {'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, read the docs: https://platform.openai.com/docs/guides/error-codes/api-errors.', 'type': 'insufficient_quota', 'param': None, 'code': 'insufficient_quota'}}
+
+This is a mock transcript for testing purposes.
+The original video ID was: jNQXAC9IVRw
+In a real scenario, this would contain the actual transcription of the YouTube video.
+Since we couldn't process the actual video audio, this placeholder is used instead.
+This enables testing of the full pipeline even when transcription fails.

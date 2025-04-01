@@ -2,6 +2,7 @@ import os
 import logging
 import openai
 from dotenv import load_dotenv
+import time
 
 # Load environment variables
 load_dotenv()
@@ -10,7 +11,7 @@ load_dotenv()
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
-def summarize_text(text, prompt_instruction, output_dir="summaries"):
+def summarize_text(text, prompt_instruction, output_dir="summaries", youtube_url=None):
     """
     Summarize text based on a specific prompt instruction using OpenAI API directly.
     
@@ -18,6 +19,7 @@ def summarize_text(text, prompt_instruction, output_dir="summaries"):
         text (str): The text to summarize
         prompt_instruction (str): The prompt with specific instructions for summarization
         output_dir (str): Directory to save the summary
+        youtube_url (str, optional): YouTube URL for file naming
     
     Returns:
         tuple: (summary_file_path, summarized_text)
@@ -25,9 +27,12 @@ def summarize_text(text, prompt_instruction, output_dir="summaries"):
     # Create output directory if it doesn't exist
     os.makedirs(output_dir, exist_ok=True)
         
-    # Generate a filename based on the first 50 chars of the prompt
-    safe_prompt = "".join([c if c.isalnum() or c in [' ', '-', '_'] else '_' for c in prompt_instruction[:50]])
-    summary_file = os.path.join(output_dir, f"summary_{safe_prompt}.txt")
+    # Generate a filename based on the video URL if provided, otherwise use a generic name
+    if youtube_url:
+        video_id = youtube_url.split("v=")[-1].split("&")[0] if "v=" in youtube_url else "unknown_video"
+        summary_file = os.path.join(output_dir, f"{video_id}.txt")
+    else:
+        summary_file = os.path.join(output_dir, f"summary_{int(time.time())}.txt")
     
     # Check if this is mock data
     if "This is a mock transcript for testing purposes" in text:
@@ -82,7 +87,11 @@ def summarize_text(text, prompt_instruction, output_dir="summaries"):
     except Exception as e:
         logger.error(f"Error summarizing text: {str(e)}")
         # Provide a mock summary in case of error
-        error_file = os.path.join(output_dir, f"error_summary_{safe_prompt}.txt")
+        if youtube_url:
+            video_id = youtube_url.split("v=")[-1].split("&")[0] if "v=" in youtube_url else "unknown_video"
+            error_file = os.path.join(output_dir, f"error_summary_{video_id}.txt")
+        else:
+            error_file = os.path.join(output_dir, f"error_summary_{int(time.time())}.txt")
         return create_mock_summary(text, prompt_instruction, error_file)
 
 def create_mock_summary(text, prompt_instruction, summary_file):
@@ -107,11 +116,9 @@ def create_mock_summary(text, prompt_instruction, summary_file):
     # Create mock summary
     mock_summary = (
         f"This is a mock summary for testing purposes.\n\n"
-        f"Based on the prompt: \"{prompt_instruction}\"\n\n"
         f"For the YouTube video with ID: {video_id}\n\n"
         f"In a real scenario, this would contain an actual AI-generated summary of the content.\n"
-        f"Since we're using mock data, this placeholder is provided to demonstrate the complete pipeline workflow.\n"
-        f"The summary would typically address the specific points requested in the prompt instruction."
+        f"Since we're using mock data, this placeholder is provided to demonstrate the complete pipeline workflow."
     )
     
     try:
