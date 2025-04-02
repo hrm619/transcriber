@@ -1,16 +1,12 @@
 import os
-import logging
 import time
 import subprocess
 import openai
 from dotenv import load_dotenv
+from .logger import logger
 
 # Load environment variables
 load_dotenv()
-
-# Setup logging
-logging.basicConfig(level=logging.INFO)
-logger = logging.getLogger(__name__)
 
 def transcribe_audio(audio_file_path, output_dir="transcripts", youtube_url=None):
     """
@@ -50,9 +46,10 @@ def transcribe_audio(audio_file_path, output_dir="transcripts", youtube_url=None
         logger.info(f"Detected fallback file: {audio_file_path}, using mock transcription.")
         return create_mock_transcript(audio_file_path, transcript_file)
     
+    # Start timing the transcription
+    start_time = time.time()
+    
     try:
-        # Start timing the transcription process
-        start_time = time.time()
         logger.info(f"Transcribing audio file with OpenAI API: {audio_file_path}")
         
         # Check if file exists
@@ -74,6 +71,7 @@ def transcribe_audio(audio_file_path, output_dir="transcripts", youtube_url=None
         with open(transcript_file, 'w', encoding='utf-8') as f:
             f.write(transcript_text)
             
+        # Calculate elapsed time
         elapsed_time = time.time() - start_time
         logger.info(f"Transcription completed in {elapsed_time:.2f} seconds. Saved to: {transcript_file}")
         
@@ -81,57 +79,28 @@ def transcribe_audio(audio_file_path, output_dir="transcripts", youtube_url=None
         
     except Exception as e:
         logger.error(f"Error transcribing audio: {str(e)}")
-        return create_mock_transcript(audio_file_path, transcript_file, error_msg=str(e))
+        raise
 
-def create_mock_transcript(audio_file_path, transcript_file, is_mock_by_choice=False, error_msg=None):
-    """
-    Create a mock transcript for testing purposes.
-    
-    Args:
-        audio_file_path (str): Path to the audio file
-        transcript_file (str): Path to save the transcript
-        is_mock_by_choice (bool): Whether we're using mock by choice or due to an error
-        error_msg (str): Error message if any
-        
-    Returns:
-        tuple: (transcript_file_path, mock_transcript_text)
-    """
-    # Extract video ID if possible
-    base_filename = os.path.basename(audio_file_path)
-    video_id = "unknown"
-    
-    if "fallback_" in base_filename:
-        video_id = base_filename.replace("fallback_", "").replace(".mp3", "")
-    else:
-        # Try to extract the video ID from the filename
-        video_id = os.path.splitext(base_filename)[0]
-    
-    message = ""
-    if error_msg:
-        message = f"Note: Transcription failed with error: {error_msg}\n\n"
-    elif is_mock_by_choice:
-        message = (
-            "Note: We're using a mock transcript by choice.\n"
-            "In a production environment, this would contain the actual transcription.\n\n"
-        )
-            
-    # Create mock transcript
-    mock_transcript = (
-        f"{message}This is a mock transcript for testing purposes.\n"
-        f"The original video ID was: {video_id}\n"
-        f"In a real scenario, this would contain the actual transcription of the YouTube video.\n"
-        f"Since we couldn't process the actual video audio, this placeholder is used instead.\n"
-        f"This enables testing of the full pipeline even when transcription fails."
-    )
-    
-    # Save the mock transcript
+def create_mock_transcript(audio_file_path, transcript_file):
+    """Create a mock transcript for testing purposes."""
     try:
+        # Extract video ID from the audio file path
+        video_id = os.path.splitext(os.path.basename(audio_file_path))[0].replace("fallback_", "")
+        
+        # Create mock transcript content
+        mock_content = f"""This is a mock transcript for testing purposes.
+The original video ID was: {video_id}
+In a real scenario, this would contain the actual transcription of the YouTube video.
+Since we couldn't download or process the actual video, this placeholder is used instead.
+This enables testing of the full pipeline even when YouTube downloads fail."""
+        
+        # Write the mock transcript to file
         with open(transcript_file, 'w', encoding='utf-8') as f:
-            f.write(mock_transcript)
-            
+            f.write(mock_content)
+        
         logger.info(f"Created mock transcript: {transcript_file}")
-        return transcript_file, mock_transcript
+        return transcript_file, mock_content
         
     except Exception as e:
         logger.error(f"Error creating mock transcript: {str(e)}")
-        return None, "Error creating transcript." 
+        raise 

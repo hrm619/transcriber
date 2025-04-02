@@ -1,18 +1,11 @@
 #!/usr/bin/env python3
 import os
-import logging
 from dotenv import load_dotenv
 from transcribe import create_youtube_processing_graph, AgentState
+from utils.logger import logger
 
 # Load environment variables
 load_dotenv()
-
-# Set up logging
-logging.basicConfig(
-    level=logging.INFO,
-    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
-)
-logger = logging.getLogger(__name__)
 
 def transcribe_video(youtube_url: str, prompt: str, use_mock: bool = False) -> dict:
     """

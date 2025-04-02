@@ -1,52 +1,48 @@
 import os
-import logging
 import openai
 from dotenv import load_dotenv
+from .logger import logger
 import time
 
 # Load environment variables
 load_dotenv()
 
-# Setup logging
-logging.basicConfig(level=logging.INFO)
-logger = logging.getLogger(__name__)
-
-def summarize_text(text, prompt_instruction, output_dir="summaries", youtube_url=None):
+def summarize_text(text, prompt_instruction, output_dir="summaries", youtube_url=None, max_text_length=4000):
     """
-    Summarize text based on a specific prompt instruction using OpenAI API directly.
+    Summarize text using OpenAI's API.
     
     Args:
-        text (str): The text to summarize
-        prompt_instruction (str): The prompt with specific instructions for summarization
+        text (str): Text to summarize
+        prompt_instruction (str): Instructions for summarization
         output_dir (str): Directory to save the summary
         youtube_url (str, optional): YouTube URL for file naming
-    
+        max_text_length (int): Maximum length of text to process
+        
     Returns:
-        tuple: (summary_file_path, summarized_text)
+        tuple: (summary_file_path, summary_text)
     """
     # Create output directory if it doesn't exist
     os.makedirs(output_dir, exist_ok=True)
-        
-    # Generate a filename based on the video URL if provided, otherwise use a generic name
-    if youtube_url:
-        video_id = youtube_url.split("v=")[-1].split("&")[0] if "v=" in youtube_url else "unknown_video"
-        summary_file = os.path.join(output_dir, f"{video_id}.txt")
-    else:
-        summary_file = os.path.join(output_dir, f"summary_{int(time.time())}.txt")
     
-    # Check if this is mock data
-    if "This is a mock transcript for testing purposes" in text:
+    # Prepare file paths
+    if youtube_url:
+        video_id = youtube_url.split("v=")[-1].split("&")[0] if "v=" in youtube_url else "unknown"
+        summary_file = os.path.join(output_dir, f"{video_id}_summary.txt")
+    else:
+        summary_file = os.path.join(output_dir, "summary.txt")
+    
+    # Check if this is a mock transcript
+    if "mock transcript" in text.lower():
         logger.info("Detected mock transcript, creating a mock summary")
-        return create_mock_summary(text, prompt_instruction, summary_file)
+        return create_mock_summary(text, summary_file)
     
     try:
         logger.info(f"Summarizing text with prompt: {prompt_instruction[:100]}...")
         
-        # Check if text is too long, truncate if necessary
-        max_text_length = 16000  # Leave room for prompt and system message
+        # Truncate text if too long
         if len(text) > max_text_length:
             logger.warning(f"Text too long ({len(text)} chars), truncating to {max_text_length} chars")
-            text = text[:max_text_length] + "... [truncated]"
+            text = text[:max_text_length] + "..."
         
         # Create the system prompt
         system_prompt = "You are an expert in summarizing content and extracting key insights from transcripts."
@@ -86,49 +82,24 @@ def summarize_text(text, prompt_instruction, output_dir="summaries", youtube_url
         
     except Exception as e:
         logger.error(f"Error summarizing text: {str(e)}")
-        # Provide a mock summary in case of error
-        if youtube_url:
-            video_id = youtube_url.split("v=")[-1].split("&")[0] if "v=" in youtube_url else "unknown_video"
-            error_file = os.path.join(output_dir, f"error_summary_{video_id}.txt")
-        else:
-            error_file = os.path.join(output_dir, f"error_summary_{int(time.time())}.txt")
-        return create_mock_summary(text, prompt_instruction, error_file)
+        raise
 
-def create_mock_summary(text, prompt_instruction, summary_file):
-    """
-    Create a mock summary for testing purposes.
-    
-    Args:
-        text (str): The original text
-        prompt_instruction (str): The original prompt instruction
-        summary_file (str): Path to save the summary
-        
-    Returns:
-        tuple: (summary_file_path, mock_summary_text)
-    """
-    # Extract any video ID if present in the text
-    video_id = "unknown"
-    for line in text.split('\n'):
-        if "original video ID was:" in line:
-            video_id = line.split(":")[-1].strip()
-            break
-            
-    # Create mock summary
-    mock_summary = (
-        f"This is a mock summary for testing purposes.\n\n"
-        f"For the YouTube video with ID: {video_id}\n\n"
-        f"In a real scenario, this would contain an actual AI-generated summary of the content.\n"
-        f"Since we're using mock data, this placeholder is provided to demonstrate the complete pipeline workflow."
-    )
-    
+def create_mock_summary(text, summary_file):
+    """Create a mock summary for testing purposes."""
     try:
-        # Save the mock summary
+        # Create mock summary content
+        mock_content = """This is a mock summary for testing purposes.
+In a real scenario, this would contain an AI-generated summary of the video content.
+The summary would focus on the key points and main ideas presented in the video.
+This mock summary enables testing of the full pipeline even when summarization fails."""
+        
+        # Write the mock summary to file
         with open(summary_file, 'w', encoding='utf-8') as f:
-            f.write(mock_summary)
-            
+            f.write(mock_content)
+        
         logger.info(f"Created mock summary: {summary_file}")
-        return summary_file, mock_summary
+        return summary_file, mock_content
         
     except Exception as e:
         logger.error(f"Error creating mock summary: {str(e)}")
-        return None, "Error creating summary." 
+        raise 

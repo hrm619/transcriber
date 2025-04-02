@@ -1,5 +1,4 @@
 import os
-import logging
 import argparse
 from typing import TypedDict, Annotated, List, Dict, Any
 from dotenv import load_dotenv
@@ -12,16 +11,10 @@ from pydantic import BaseModel, Field
 from utils.youtube_downloader import download_youtube_audio
 from utils.transcriber import transcribe_audio
 from utils.summarizer import summarize_text
+from utils.logger import logger
 
 # Load environment variables
 load_dotenv()
-
-# Set up logging
-logging.basicConfig(
-    level=logging.INFO,
-    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
-)
-logger = logging.getLogger(__name__)
 
 # Define our state
 class AgentState(TypedDict):
