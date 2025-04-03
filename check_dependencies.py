@@ -43,7 +43,7 @@ def check_python_dependencies():
         for package in missing_packages:
             print(f"  - {package}")
         print("\nPlease install them with:")
-        print(f"pip install {' '.join(missing_packages)}")
+        print(f"uv pip install {' '.join(missing_packages)}")
         return False
     
     return True

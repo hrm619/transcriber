@@ -9,13 +9,13 @@ A Python application that processes YouTube videos by:
 
 1. Create a virtual environment:
 ```bash
-python3 -m venv .venv
+uv venv
 source .venv/bin/activate  # On Unix/macOS
 ```
 
 2. Install dependencies:
 ```bash
-pip install -r requirements.txt
+uv pip sync requirements.txt
 ```
 
 3. Create a `.env` file with your configuration:
@@ -29,6 +29,7 @@ LOG_LEVEL=INFO
 - Python 3.x
 - FFmpeg
 - OpenAI API key
+- uv (install with `curl -LsSf https://astral.sh/uv/install.sh | sh` on macOS/Linux or `irm https://astral.sh/uv/install.ps1 | iex` on Windows)
 
 ## Usage
 
